@@ -29,23 +29,56 @@ import (
 
 func findSubstring(s string, words []string) []int {
 	result := []int{}
+	if len(s) == 0 || len(words) == 0 {
+		return result
+	}
+	step := len(words[0])
 
+	temp := []string{}
+	test("", words, &temp)
+	m := map[int]bool{}
+	// find all "aa" in "aaa"
+	for j := 0; j < step; j++ {
+		for _, v := range temp {
+			i := strings.Index(s, v)
+			p := i
+			for i >= 0 {
+				if _, ok := m[p]; !ok {
+					m[p] = true
+					result = append(result, p)
+				}
+				p += step
+				i = strings.Index(s[p:], v)
+				// fmt.Println("current i:", i)
+				// fmt.Println("current s:", s[p:])
+				// time.Sleep(1 * time.Second)
+			}
+		}
+	}
 	return result
 }
 
-func main() {
-	words := []string{"word","good","best","word"}
+func test(prefix string, sl []string, result *[]string) {
+	if len(sl) == 0 {
+		*result = append(*result, prefix)
+	}
 
+	m := map[string]bool{}
+	for k, v := range sl {
+		if _, ok := m[v]; ok {
+			continue
+		}
+		m[v] = true
+		temp := []string{}
+		temp = append(temp, sl[:k]...)
+		temp = append(temp, sl[k+1:]...)
+		test(prefix+v, temp, result)
+	}
 }
 
-func test(prefix string, sl []string) string {
-	if len(sl) == 0 {
-		return prefix
-	} else if (len(sl) == 1) {
-		return prefix + sl[0]
-	}
-
-	for k, v := range sl {
-		
-	}
+func main() {
+	// words := []string{"word", "good", "best", "good"}
+	words := []string{"aa", "aa"}
+	s := "aaaaaaaaaaaaaa"
+	fmt.Println(findSubstring(s, words))
 }
