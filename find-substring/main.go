@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
 // ---困难---
@@ -32,53 +31,76 @@ func findSubstring(s string, words []string) []int {
 	if len(s) == 0 || len(words) == 0 {
 		return result
 	}
-	step := len(words[0])
 
-	temp := []string{}
-	test("", words, &temp)
-	m := map[int]bool{}
-	// find all "aa" in "aaa"
-	for j := 0; j < step; j++ {
-		for _, v := range temp {
-			i := strings.Index(s, v)
-			p := i
-			for i >= 0 {
-				if _, ok := m[p]; !ok {
-					m[p] = true
-					result = append(result, p)
+	m := map[string]int{}
+
+	for _, word := range words {
+		incWordCount(word, &m)
+	}
+
+	wordNum := len(words)
+	wordLen := len(words[0])
+	count := 0
+	for i := 0; i < wordLen; i++ {
+		count = 0
+		left := i
+		right := left
+		tempM := map[string]int{}
+		word := ""
+		for right < len(s) {
+			tempLeft := right
+			right += wordLen
+			if right > len(s) {
+				right = len(s)
+			}
+			count++
+			word = s[tempLeft:right]
+			incWordCount(word, &tempM)
+			for getWordCount(word, tempM) > getWordCount(word, m) {
+				if getWordCount(word, m) == 0 {
+					tempM = map[string]int{}
+					count = 0
+					left = right
+					continue
 				}
-				p += step
-				i = strings.Index(s[p:], v)
-				// fmt.Println("current i:", i)
-				// fmt.Println("current s:", s[p:])
-				// time.Sleep(1 * time.Second)
+				tempLeft := left
+				left += wordLen
+				if left > len(s) {
+					left = len(s)
+				}
+				decWordCount(s[tempLeft:left], &tempM)
+				count--
+			}
+			if count == wordNum {
+				result = append(result, left)
 			}
 		}
 	}
 	return result
 }
 
-func test(prefix string, sl []string, result *[]string) {
-	if len(sl) == 0 {
-		*result = append(*result, prefix)
+func getWordCount(word string, words map[string]int) int {
+	if _, ok := words[word]; !ok {
+		return 0
 	}
+	return words[word]
+}
 
-	m := map[string]bool{}
-	for k, v := range sl {
-		if _, ok := m[v]; ok {
-			continue
-		}
-		m[v] = true
-		temp := []string{}
-		temp = append(temp, sl[:k]...)
-		temp = append(temp, sl[k+1:]...)
-		test(prefix+v, temp, result)
+func incWordCount(word string, words *map[string]int) {
+	if _, ok := (*words)[word]; !ok {
+		(*words)[word] = 1
+		return
 	}
+	(*words)[word]++
+}
+
+func decWordCount(word string, words *map[string]int) {
+	(*words)[word]--
 }
 
 func main() {
 	// words := []string{"word", "good", "best", "good"}
-	words := []string{"aa", "aa"}
-	s := "aaaaaaaaaaaaaa"
+	words := []string{"foo", "bar"}
+	s := "barfoothefoobarman"
 	fmt.Println(findSubstring(s, words))
 }
