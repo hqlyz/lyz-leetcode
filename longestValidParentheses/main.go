@@ -16,32 +16,45 @@ import "fmt"
 // 输入：s = ""
 // 输出：0
 func longestValidParentheses(s string) int {
-	count := 0
-	maxCount := 0
-	stack := []rune{}
-	for _, ss := range s {
-		switch ss {
-		case '(':
-			stack = append(stack, ss)
-		case ')':
-			if len(stack) > 0 {
-				stack = stack[:len(stack) - 1]
-				count++
-				if maxCount < count {
-					maxCount = count
+	maxLen := 0
+	dp := make([]int, len(s))
+	for k, v := range s {
+		if v == ')' && k > 0 {
+			if s[k-1] == '(' {
+				if k < 2 {
+					dp[k] = 2
+				} else {
+					dp[k] = 2 + dp[k-2]
 				}
 			} else {
-				count = 0
+				if (k-dp[k-1]-1) >= 0 && s[k-dp[k-1]-1] == '(' {
+					if k-dp[k-1]-2 >= 0 {
+						dp[k] = dp[k-1] + 2 + dp[k-dp[k-1]-2]
+					} else {
+						dp[k] = dp[k-1] + 2
+					}
+				}
 			}
+			maxLen = max(maxLen, dp[k])
 		}
 	}
-	return maxCount * 2
+
+	return maxLen
+}
+
+func max(maxLen, i int) int {
+	if maxLen < i {
+		return i
+	}
+	return maxLen
 }
 
 func main() {
 	s := "()(()"
 	fmt.Println(longestValidParentheses(s))
 	s = "(()"
+	fmt.Println(longestValidParentheses(s))
+	s = "())"
 	fmt.Println(longestValidParentheses(s))
 	s = ")()())"
 	fmt.Println(longestValidParentheses(s))
