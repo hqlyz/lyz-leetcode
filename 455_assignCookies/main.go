@@ -5,6 +5,7 @@ import (
 	"sort"
 )
 
+// easy
 // input: [1, 2], [1, 2, 3]
 // output: 2
 
@@ -21,8 +22,8 @@ func assignCookies(children []int, cookies []int) int {
 	sort.Slice(cookies, func(i, j int) bool {return cookies[i] < cookies[j]});
 
 	count := 0
-	for(len(children) > 0 && len(cookies) > 0) {
-		if(cookies[0] >= children[0]) {
+	for len(children) > 0 && len(cookies) > 0 {
+		if cookies[0] >= children[0] {
 			children = children[1:]
 			count++
 		}
