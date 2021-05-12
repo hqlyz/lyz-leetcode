@@ -2,20 +2,33 @@ package main
 
 import (
 	"fmt"
+	"sync"
 )
 
 func main() {
-	// f, err := os.Create("trace.out")
-	// if err != nil {
-	// 	return
-	// }
-	// defer f.Close()
+	o1 := new(Once)
+	for i := 0; i < 1000000; i++ {
+		go o1.Do(hello)
+	}
+}
 
-	// err = trace.Start(f)
-	// if err != nil {
-	// 	return
-	// }
-	// defer trace.Stop()
+func hello() {
+	fmt.Println("Hello")
+}
 
-	fmt.Println("Hello world")
+type Once struct {
+	m sync.Mutex
+	done uint32
+}
+
+func (o *Once) Do(f func()) {
+	if o.done == 1 {
+		return
+	}
+	o.m.Lock()
+	defer o.m.Unlock()
+	if o.done == 0 {
+		o.done = 1
+		f()
+	}
 }
